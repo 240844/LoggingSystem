@@ -3,4 +3,5 @@ project(SCRProject1 C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(SCRProject1 main.c)
+add_executable(SCRProject1 main.c
+        logger.h)
