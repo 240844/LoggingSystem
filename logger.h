@@ -9,4 +9,11 @@ typedef enum logger_level {
 
 #define FILENAME "log.txt"
 
+//public functions for users
+
+void save_log(logger_level_t level, const char* message, ...);
+int set_message(char* message);
+void logger_init(void);
+void logger_destroy(void);
+
 #endif //LOGGER_H
