@@ -1,0 +1,3 @@
+/home/mekir/CLionProjects/SCRProject1/cmake-build-debug/CMakeFiles/SCRProject1.dir
+/home/mekir/CLionProjects/SCRProject1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/mekir/CLionProjects/SCRProject1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
