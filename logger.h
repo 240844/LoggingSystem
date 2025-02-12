@@ -2,9 +2,9 @@
 #define LOGGER_H
 
 typedef enum logger_level {
-    min_log,
-    standard_log,
-    max_log
+    LOG_MIN = 1,
+    LOG_STANDARD,
+    LOG_ALL
 }logger_level_t;
 
 #define FILENAME "log.txt"
@@ -13,7 +13,7 @@ typedef enum logger_level {
 
 void save_log(logger_level_t level, const char* message, ...);
 int set_message(char* message);
-void logger_init(void);
-void logger_destroy(void);
+void init_logger(void);
+void destroy_logger(void);
 
 #endif //LOGGER_H

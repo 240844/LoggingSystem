@@ -49,8 +49,8 @@ cmake_ninja_workdir = /home/mekir/CLionProjects/SCRProject1/cmake-build-debug/
 
 build cmake_object_order_depends_target_SCRProject1: phony || .
 
-build CMakeFiles/SCRProject1.dir/main.c.o: C_COMPILER__SCRProject1_unscanned_Debug /home/mekir/CLionProjects/SCRProject1/main.c || cmake_object_order_depends_target_SCRProject1
-  DEP_FILE = CMakeFiles/SCRProject1.dir/main.c.o.d
+build CMakeFiles/SCRProject1.dir/logger.c.o: C_COMPILER__SCRProject1_unscanned_Debug /home/mekir/CLionProjects/SCRProject1/logger.c || cmake_object_order_depends_target_SCRProject1
+  DEP_FILE = CMakeFiles/SCRProject1.dir/logger.c.o.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles/SCRProject1.dir
   OBJECT_FILE_DIR = CMakeFiles/SCRProject1.dir
@@ -63,7 +63,7 @@ build CMakeFiles/SCRProject1.dir/main.c.o: C_COMPILER__SCRProject1_unscanned_Deb
 #############################################
 # Link the executable SCRProject1
 
-build SCRProject1: C_EXECUTABLE_LINKER__SCRProject1_Debug CMakeFiles/SCRProject1.dir/main.c.o
+build SCRProject1: C_EXECUTABLE_LINKER__SCRProject1_Debug CMakeFiles/SCRProject1.dir/logger.c.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/SCRProject1.dir
   POST_BUILD = :
