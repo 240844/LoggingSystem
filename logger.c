@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <time.h>
-#include <stdarg.h>
+#include <stdatomic.h>
 #include <string.h>
 #include <errno.h>
 #include "logger.h"
@@ -11,9 +11,9 @@
 #include <stdbool.h>
 #include <iso646.h>
 
-static sig_atomic_t is_init = false; // is logger initialized
-volatile static sig_atomic_t is_logger_active = true;
-volatile static sig_atomic_t current_logger_detail = LOG_MIN;
+static sig_atomic_t is_init = ATOMIC_VAR_INIT(false); // is logger initialized
+volatile static sig_atomic_t is_logger_active =  ATOMIC_VAR_INIT(true);
+volatile static sig_atomic_t current_logger_detail = ATOMIC_VAR_INIT(LOG_MIN);
 
 static pthread_mutex_t log_mutex;
 
@@ -23,20 +23,20 @@ static pthread_mutex_t dump_msg_mutex;
 char* message_to_dump;
 
 static pthread_mutex_t terminate_mutex;
-static sig_atomic_t terminate_thread = false;
+static sig_atomic_t terminate_thread = ATOMIC_VAR_INIT(false);
 
 void handle_dump(int signo, siginfo_t* info, void *other) {
     sem_post(&dumb_sem);
 }
 
 void handle_change_logger_active(int signo, siginfo_t* info, void *other) {
-    is_logger_active = !is_logger_active;
+    atomic_store(&is_logger_active, !atomic_load(&is_logger_active));
 }
 
 void handle_level(int signo, siginfo_t* info, void *other) {
     const int new_detail_level = info->si_value.sival_int;
     if (new_detail_level < LOG_MIN or new_detail_level > LOG_MAX) return;
-    current_logger_detail = new_detail_level;
+    atomic_store(&current_logger_detail, new_detail_level);
 }
 
 void* dump_message(void* arg) {
@@ -46,7 +46,7 @@ void* dump_message(void* arg) {
             continue;
         }
         pthread_mutex_lock(&terminate_mutex);
-        if (terminate_thread) {
+        if (atomic_load(&terminate_thread)) {
             pthread_mutex_unlock(&terminate_mutex);
             break;
         }
@@ -80,12 +80,12 @@ void* dump_message(void* arg) {
 void save_log(const logger_level_t level, const char* message) {
     pthread_mutex_lock(&log_mutex);
 
-    if (is_logger_active == false or is_init == false) {
+    if (atomic_load(&is_logger_active) == false or atomic_load(&is_init) == false) {
         pthread_mutex_unlock(&log_mutex);
         return;
     }
 
-    if (level < current_logger_detail) {
+    if (level < atomic_load(&current_logger_detail)) {
         pthread_mutex_unlock(&log_mutex);
         return;
     }
@@ -126,7 +126,7 @@ int set_message(char* message) {
 }
 
 void init_logger(void) {
-    if (is_init) {
+    if (atomic_load(&is_init)) {
         return;
     }
 
@@ -154,12 +154,12 @@ void init_logger(void) {
 
     pthread_create(&dumb_thread, NULL, dump_message, NULL);
 
-    is_init = true;
+    atomic_store(&is_init, true);
 }
 
 void destroy_logger(void) {
     pthread_mutex_lock(&terminate_mutex);
-    terminate_thread = true;
+    atomic_store(&terminate_thread, true);
     pthread_mutex_unlock(&terminate_mutex);
     sem_post(&dumb_sem);
     pthread_join(dumb_thread, NULL);
@@ -168,16 +168,11 @@ void destroy_logger(void) {
     pthread_mutex_destroy(&dump_msg_mutex);
     pthread_mutex_destroy(&terminate_mutex);
 
-    struct sigaction action;
-    action.sa_handler = SIG_DFL;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-
     if (message_to_dump) {
         free(message_to_dump);
     }
 
-    terminate_thread = false;
-    is_init = false;
-    current_logger_detail = LOG_MIN;
+    atomic_store(&terminate_thread, false);
+    atomic_store(&is_init, false);
+    atomic_store(&current_logger_detail, LOG_MIN);
 }
